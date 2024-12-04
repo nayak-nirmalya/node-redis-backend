@@ -1,10 +1,13 @@
 {
   "name": "node-redis-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Node, Redis, TypeScript & Express Backend",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsx watch --env-file .env index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
   },
   "keywords": [],
   "author": "",
