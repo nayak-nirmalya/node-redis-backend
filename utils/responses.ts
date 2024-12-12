@@ -7,7 +7,7 @@ export function successResponse({
 }: {
   res: Response;
   data: any;
-  message: string;
+  message?: string;
 }) {
   return res.status(200).json({ success: true, message, data });
 }
