@@ -2,16 +2,15 @@ import express, { type Request } from "express";
 import { nanoid } from "nanoid";
 
 import { validate } from "../middlewares/validate.js";
+import { checkRestaurantExists } from "../middlewares/checkRestaurantId.js";
+
 import { RestaurantSchema, type Restaurant } from "../schemas/restaurant.js";
+
 import { initializeRedisClient } from "../utils/client.js";
 import { restaurantKeyById } from "../utils/keys.js";
 import { successResponse } from "../utils/responses.js";
 
 export const router = express.Router();
-
-router.get("/", async (req, res) => {
-  res.send("Hello, World!");
-});
 
 router.post("/", validate(RestaurantSchema), async (req, res, next) => {
   const data = req.body as Restaurant;
@@ -37,6 +36,7 @@ router.post("/", validate(RestaurantSchema), async (req, res, next) => {
 
 router.get(
   "/:restaurantId",
+  checkRestaurantExists,
   async (req: Request<{ restaurantId: string }>, res, next) => {
     const { restaurantId } = req.params;
 

@@ -9,6 +9,10 @@ const PORT = process.env.PORT || 3000;
 
 const app = express();
 
+app.get("/", async (req, res) => {
+  res.send("Hello, World!");
+});
+
 app.use(express.json());
 app.use("/restaurants", restaurantsRouter);
 app.use("/cuisines", cuisinesRouter);
