@@ -1,4 +1,4 @@
-import express from "express";
+import express, { type Request } from "express";
 import { nanoid } from "nanoid";
 
 import { validate } from "../middlewares/validate.js";
@@ -34,3 +34,20 @@ router.post("/", validate(RestaurantSchema), async (req, res, next) => {
     next(error);
   }
 });
+
+router.get(
+  "/:restaurantId",
+  async (req: Request<{ restaurantId: string }>, res, next) => {
+    const { restaurantId } = req.params;
+
+    try {
+      const client = await initializeRedisClient();
+      const restaurantKey = restaurantKeyById(restaurantId);
+      const restaurant = await client.hGetAll(restaurantKey);
+
+      return successResponse({ res, data: restaurant });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
