@@ -13,7 +13,7 @@ import {
   reviewDetailsKeyById,
   reviewKeyById,
 } from "../utils/keys.js";
-import { successResponse } from "../utils/responses.js";
+import { errorResponse, successResponse } from "../utils/responses.js";
 
 export const router = express.Router();
 
@@ -94,6 +94,42 @@ router.get(
       );
 
       return successResponse({ res, data: reviews });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.delete(
+  "/:restaurantId/reviews/:reviewId",
+  checkRestaurantExists,
+  validate(ReviewSchema),
+  async (
+    req: Request<{ restaurantId: string; reviewId: string }>,
+    res,
+    next
+  ) => {
+    const { restaurantId, reviewId } = req.params;
+
+    try {
+      const client = await initializeRedisClient();
+      const reviewKey = reviewKeyById(restaurantId);
+      const reviewDetailsKey = reviewDetailsKeyById(reviewId);
+
+      const [removeResult, deleteResult] = await Promise.all([
+        client.lRem(reviewKey, 0, reviewId),
+        client.del(reviewDetailsKey),
+      ]);
+
+      if (removeResult === 0 && deleteResult === 0) {
+        return errorResponse({ res, error: "Review not found", status: 404 });
+      }
+
+      return successResponse({
+        res,
+        data: reviewId,
+        message: "Review deleted",
+      });
     } catch (error) {
       next(error);
     }
