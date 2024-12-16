@@ -155,12 +155,13 @@ router.get(
     try {
       const client = await initializeRedisClient();
       const restaurantKey = restaurantKeyById(restaurantId);
-      const [_, restaurant] = await Promise.all([
+      const [_, restaurant, cuisines] = await Promise.all([
         client.hIncrBy(restaurantKey, "viewCount", 1),
         client.hGetAll(restaurantKey),
+        client.sMembers(restaurantCuisinesKeyById(restaurantId)),
       ]);
 
-      return successResponse({ res, data: restaurant });
+      return successResponse({ res, data: { ...restaurant, cuisines } });
     } catch (error) {
       next(error);
     }
