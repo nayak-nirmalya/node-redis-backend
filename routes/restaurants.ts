@@ -31,7 +31,8 @@ router.get("/", async (req, res, next) => {
     const restaurantIds = await client.zRange(
       restaurantsByRatingKey,
       start,
-      end
+      end,
+      { REV: true }
     );
 
     const restaurants = await Promise.all(
