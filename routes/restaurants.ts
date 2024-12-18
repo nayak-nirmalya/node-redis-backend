@@ -13,6 +13,7 @@ import {
   cuisinesKey,
   restaurantCuisinesKeyById,
   restaurantKeyById,
+  restaurantsByRatingKey,
   reviewDetailsKeyById,
   reviewKeyById,
 } from "../utils/keys.js";
@@ -37,6 +38,10 @@ router.post("/", validate(RestaurantSchema), async (req, res, next) => {
         ])
       ),
       client.hSet(restaurantKey, hashData),
+      client.zAdd(restaurantsByRatingKey, {
+        score: 0,
+        value: id,
+      }),
     ]);
 
     return successResponse({
