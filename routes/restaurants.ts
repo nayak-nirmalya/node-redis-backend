@@ -66,6 +66,7 @@ router.post(
       const client = await initializeRedisClient();
       const reviewId = nanoid();
       const reviewKey = reviewKeyById(restaurantId);
+      const restaurantKey = restaurantKeyById(restaurantId);
       const reviewDetailsKey = reviewDetailsKeyById(reviewId);
       const reviewData = {
         id: reviewId,
@@ -74,9 +75,19 @@ router.post(
         restaurantId,
       };
 
-      await Promise.all([
+      const [reviewCount, _setResult, totalStars] = await Promise.all([
         client.lPush(reviewKey, reviewId),
         client.hSet(reviewDetailsKey, reviewData),
+        client.hIncrBy(restaurantKey, "totalStars", data.rating),
+      ]);
+
+      const averageRating = Number((totalStars / reviewCount).toFixed(1));
+      await Promise.all([
+        client.zAdd(restaurantsByRatingKey, {
+          score: averageRating,
+          value: restaurantId,
+        }),
+        client.hSet(restaurantKey, "avgStars", averageRating),
       ]);
 
       return successResponse({
