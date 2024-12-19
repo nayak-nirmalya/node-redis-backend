@@ -88,6 +88,9 @@ router.get(
     try {
       const client = await initializeRedisClient();
       const weatherKey = weatherKeyById(restaurantId);
+      const cachedWeather = await client.get(weatherKey);
+      if (cachedWeather) return successResponse({ res, data: cachedWeather });
+
       const restaurantKey = restaurantKeyById(restaurantId);
       const coords = await client.hGet(restaurantKey, "location");
       if (!coords) {
