@@ -111,7 +111,7 @@ router.get(
       if (apiResponse.status === 200) {
         console.log("CACHE_MISS");
         const json = await apiResponse.json();
-        await client.set(weatherKey, JSON.stringify(json));
+        await client.set(weatherKey, JSON.stringify(json), { EX: 60 * 60 });
         return successResponse({ res, data: json });
       }
 
