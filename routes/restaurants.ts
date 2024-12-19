@@ -78,6 +78,20 @@ router.post("/", validate(RestaurantSchema), async (req, res, next) => {
   }
 });
 
+router.get(
+  "/:restaurantId/weather",
+  checkRestaurantExists,
+  async (req: Request<{ restaurantId: string }>, res, next) => {
+    const { restaurantId } = req.params;
+
+    try {
+      const client = await initializeRedisClient();
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 router.post(
   "/:restaurantId/reviews",
   checkRestaurantExists,
