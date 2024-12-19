@@ -97,6 +97,21 @@ router.get(
           error: "Co-ordinates have not been found",
         });
       }
+
+      const [lng, lat] = coords.split(",");
+      const apiResponse = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?units=imperial&lat=${lat}&lon=${lng}&appid=${process.env.WEATHER_API_KEY}`
+      );
+      if (apiResponse.status === 200) {
+        const json = await apiResponse.json();
+        return successResponse({ res, data: json });
+      }
+
+      return errorResponse({
+        res,
+        status: 500,
+        error: "Couldn't fetch weather info",
+      });
     } catch (error) {
       next(error);
     }
