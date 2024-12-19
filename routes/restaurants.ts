@@ -89,7 +89,10 @@ router.get(
       const client = await initializeRedisClient();
       const weatherKey = weatherKeyById(restaurantId);
       const cachedWeather = await client.get(weatherKey);
-      if (cachedWeather) return successResponse({ res, data: cachedWeather });
+      if (cachedWeather) {
+        console.log("CACHE_HIT");
+        return successResponse({ res, data: JSON.parse(cachedWeather) });
+      }
 
       const restaurantKey = restaurantKeyById(restaurantId);
       const coords = await client.hGet(restaurantKey, "location");
@@ -106,7 +109,9 @@ router.get(
         `https://api.openweathermap.org/data/2.5/weather?units=imperial&lat=${lat}&lon=${lng}&appid=${process.env.WEATHER_API_KEY}`
       );
       if (apiResponse.status === 200) {
+        console.log("CACHE_MISS");
         const json = await apiResponse.json();
+        await client.set(weatherKey, JSON.stringify(json));
         return successResponse({ res, data: json });
       }
 
