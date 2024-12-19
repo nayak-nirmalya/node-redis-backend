@@ -16,6 +16,7 @@ import {
   restaurantsByRatingKey,
   reviewDetailsKeyById,
   reviewKeyById,
+  weatherKeyById,
 } from "../utils/keys.js";
 import { errorResponse, successResponse } from "../utils/responses.js";
 
@@ -86,6 +87,16 @@ router.get(
 
     try {
       const client = await initializeRedisClient();
+      const weatherKey = weatherKeyById(restaurantId);
+      const restaurantKey = restaurantKeyById(restaurantId);
+      const coords = await client.hGet(restaurantKey, "location");
+      if (!coords) {
+        return errorResponse({
+          res,
+          status: 404,
+          error: "Co-ordinates have not been found",
+        });
+      }
     } catch (error) {
       next(error);
     }
