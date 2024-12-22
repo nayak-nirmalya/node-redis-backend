@@ -4,7 +4,12 @@ import { nanoid } from "nanoid";
 import { validate } from "../middlewares/validate.js";
 import { checkRestaurantExists } from "../middlewares/checkRestaurantId.js";
 
-import { RestaurantSchema, type Restaurant } from "../schemas/restaurant.js";
+import {
+  RestaurantDetailsSchema,
+  RestaurantSchema,
+  type Restaurant,
+  type RestaurantDetails,
+} from "../schemas/restaurant.js";
 import { ReviewSchema, type Review } from "../schemas/review.js";
 
 import { initializeRedisClient } from "../utils/client.js";
@@ -12,6 +17,7 @@ import {
   cuisineKey,
   cuisinesKey,
   restaurantCuisinesKeyById,
+  restaurantDetailsKeyById,
   restaurantKeyById,
   restaurantsByRatingKey,
   reviewDetailsKeyById,
@@ -119,6 +125,30 @@ router.get(
         res,
         status: 500,
         error: "Couldn't fetch weather info",
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.post(
+  "/:restaurantId/details",
+  checkRestaurantExists,
+  validate(RestaurantDetailsSchema),
+  async (req: Request<{ restaurantId: string }>, res, next) => {
+    const { restaurantId } = req.params;
+    const data = req.body as RestaurantDetails;
+
+    try {
+      const client = await initializeRedisClient();
+      const restaurantDetailsKey = restaurantDetailsKeyById(restaurantId);
+      const returnData = await client.json.set(restaurantDetailsKey, ".", data);
+
+      return successResponse({
+        res,
+        data: returnData,
+        message: "Review added",
       });
     } catch (error) {
       next(error);
