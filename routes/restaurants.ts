@@ -148,7 +148,28 @@ router.post(
       return successResponse({
         res,
         data: returnData,
-        message: "Review added",
+        message: "Restaurant details added",
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.get(
+  "/:restaurantId/details",
+  checkRestaurantExists,
+  async (req: Request<{ restaurantId: string }>, res, next) => {
+    const { restaurantId } = req.params;
+
+    try {
+      const client = await initializeRedisClient();
+      const restaurantDetailsKey = restaurantDetailsKeyById(restaurantId);
+      const details = await client.json.get(restaurantDetailsKey);
+
+      return successResponse({
+        res,
+        data: details,
       });
     } catch (error) {
       next(error);
